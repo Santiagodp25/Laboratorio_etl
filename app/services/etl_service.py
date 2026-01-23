@@ -29,16 +29,59 @@ class ETLService:
                     "fuente": "Rick & Morty API",
                     "status": 400
                 }
+            
+            print(f"📥 Iniciando extracción de {cantidad} personajes...")
+            
+            registros_guardados = 0
+            pagina = 1
+            collection = self.mongo_db[self.collection_name]
+            
+            while registros_guardados < cantidad:
+                # Hacer request a la API con paginación
+                response = requests.get(f"{self.api_url}?page={pagina}", timeout=30)
+                response.raise_for_status()
                 
-            # Aquí implementaremos la lógica de extracción
-            # Por ahora estructura base
+                data = response.json()
+                personajes = data.get("results", [])
+                
+                if not personajes:
+                    break  # No hay más personajes
+                
+                # Preparar operaciones bulk con idempotencia
+                operaciones = []
+                for personaje in personajes:
+                    if registros_guardados >= cantidad:
+                        break
+                    
+                    # Usar el ID de la API como _id en MongoDB para idempotencia
+                    personaje_id = personaje.get("id")
+                    
+                    operacion = UpdateOne(
+                        {"_id": personaje_id},  # Buscar por ID único
+                        {"$set": personaje},    # Actualizar o insertar
+                        upsert=True              # Insertar si no existe
+                    )
+                    operaciones.append(operacion)
+                    registros_guardados += 1
+                
+                # Ejecutar operaciones en bulk
+                if operaciones:
+                    result = collection.bulk_write(operaciones)
+                    print(f"   Página {pagina}: {len(operaciones)} personajes procesados")
+                
+                pagina += 1
+            
+            print(f"✅ Extracción completada: {registros_guardados} registros")
+            
             return {
-                "mensaje": "Extracción implementada parcialmente",
-                "registros_guardados": 0,
-                "fuente": "Rick & Morty API", 
+                "mensaje": "Datos extraídos exitosamente",
+                "registros_guardados": registros_guardados,
+                "fuente": "Rick & Morty API",
                 "status": 201
             }
             
+        except requests.exceptions.RequestException as e:
+            raise Exception(f"Error de conexión con la API: {str(e)}")
         except Exception as e:
             raise Exception(f"Error en extracción: {str(e)}")
     
