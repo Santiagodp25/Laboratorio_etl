@@ -179,12 +179,38 @@ class ETLService:
         Endpoint C: Limpiar MongoDB y MySQL
         """
         try:
-            # Aquí implementaremos la lógica de reset
-            # Por ahora estructura base
+            print("🧹 Iniciando limpieza del sistema...")
+            
+            # 1. Limpiar MongoDB
+            collection = self.mongo_db[self.collection_name]
+            mongo_count = collection.count_documents({})
+            collection.delete_many({})
+            
+            # 2. Limpiar MySQL
+            with self.mysql_engine.connect() as conn:
+                # Verificar si la tabla existe
+                result = conn.execute(
+                    "SELECT COUNT(*) as count FROM information_schema.tables "
+                    "WHERE table_schema = DATABASE() AND table_name = 'personajes_master'"
+                )
+                table_exists = result.fetchone()['count'] > 0
+                
+                mysql_count = 0
+                if table_exists:
+                    # Contar registros antes de eliminar
+                    result = conn.execute("SELECT COUNT(*) as count FROM personajes_master")
+                    mysql_count = result.fetchone()['count']
+                    
+                    # Truncar tabla (más rápido que DELETE)
+                    conn.execute("TRUNCATE TABLE personajes_master")
+                    conn.commit()
+            
+            print(f"✅ Sistema limpiado: MongoDB({mongo_count}), MySQL({mysql_count})")
+            
             return {
-                "mensaje": "Reset implementado parcialmente",
-                "mongo_docs_eliminados": 0,
-                "mysql_rows_eliminadas": 0,
+                "mensaje": "Sistema reseteado correctamente",
+                "mongo_docs_eliminados": mongo_count,
+                "mysql_rows_eliminadas": mysql_count,
                 "status": 200
             }
             
