@@ -158,7 +158,7 @@ class ETLService:
             registros_procesados = df_final.to_sql(
                 name='personajes_master',
                 con=self.mysql_engine,
-                if_exists='append',  # Append para no duplicar si existe
+                if_exists='replace',  # Append para no duplicar si existe
                 index=False,
                 method='multi'  # Inserción múltiple
             )
