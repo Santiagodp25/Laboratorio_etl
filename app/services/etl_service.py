@@ -4,6 +4,7 @@ from typing import Dict, List, Any
 from datetime import datetime
 from pymongo import UpdateOne
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import text
 
 from app.database import get_mongo_client, get_mysql_engine
 from app.models.personajes_sql import PersonajeSQL, Base
@@ -190,19 +191,19 @@ class ETLService:
             with self.mysql_engine.connect() as conn:
                 # Verificar si la tabla existe
                 result = conn.execute(
-                    "SELECT COUNT(*) as count FROM information_schema.tables "
-                    "WHERE table_schema = DATABASE() AND table_name = 'personajes_master'"
+                    text("SELECT COUNT(*) as count FROM information_schema.tables "
+                         "WHERE table_schema = DATABASE() AND table_name = 'personajes_master'")
                 )
-                table_exists = result.fetchone()['count'] > 0
+                table_exists = result.fetchone()[0] > 0
                 
                 mysql_count = 0
                 if table_exists:
                     # Contar registros antes de eliminar
-                    result = conn.execute("SELECT COUNT(*) as count FROM personajes_master")
-                    mysql_count = result.fetchone()['count']
+                    result = conn.execute(text("SELECT COUNT(*) as count FROM personajes_master"))
+                    mysql_count = result.fetchone()[0]
                     
                     # Truncar tabla (más rápido que DELETE)
-                    conn.execute("TRUNCATE TABLE personajes_master")
+                    conn.execute(text("TRUNCATE TABLE personajes_master"))
                     conn.commit()
             
             print(f"✅ Sistema limpiado: MongoDB({mongo_count}), MySQL({mysql_count})")
