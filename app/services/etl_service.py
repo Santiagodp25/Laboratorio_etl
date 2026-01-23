@@ -91,11 +91,82 @@ class ETLService:
         Requisito: No duplicar en SQL
         """
         try:
-            # Aquí implementaremos la lógica de transformación
-            # Por ahora estructura base
+            print("🔄 Iniciando transformación y carga a MySQL...")
+            
+            # 1. EXTRACT: Leer datos de MongoDB
+            collection = self.mongo_db[self.collection_name]
+            cursor = collection.find({})
+            datos_mongo = list(cursor)
+            
+            if not datos_mongo:
+                return {
+                    "mensaje": "No hay datos en MongoDB para transformar",
+                    "registros_procesados": 0,
+                    "tabla_destino": "personajes_master",
+                    "status": 200
+                }
+            
+            print(f"   📊 Datos en MongoDB: {len(datos_mongo)} documentos")
+            
+            # 2. TRANSFORM: Convertir a DataFrame de Pandas
+            df = pd.DataFrame(datos_mongo)
+            
+            # Aplanar columnas anidadas
+            df['origin_name'] = df['origin'].apply(lambda x: x.get('name') if x else 'Unknown')
+            df['origin_url'] = df['origin'].apply(lambda x: x.get('url') if x else None)
+            df['location_name'] = df['location'].apply(lambda x: x.get('name') if x else 'Unknown')
+            df['location_url'] = df['location'].apply(lambda x: x.get('url') if x else None)
+            
+            # Contar episodios
+            df['episode_count'] = df['episode'].apply(lambda x: len(x) if isinstance(x, list) else 0)
+            
+            # Seleccionar y renombrar columnas según el modelo SQL
+            columnas_finales = {
+                'id': 'id',
+                'name': 'name',
+                'status': 'status',
+                'species': 'species',
+                'type': 'type',
+                'gender': 'gender',
+                'origin_name': 'origin_name',
+                'origin_url': 'origin_url',
+                'location_name': 'location_name',
+                'location_url': 'location_url',
+                'image': 'image',
+                'episode_count': 'episode_count',
+                'url': 'url',
+                'created': 'created'
+            }
+            
+            df_final = df[list(columnas_finales.keys())].rename(columns=columnas_finales)
+            
+            # Manejar valores nulos
+            df_final = df_final.fillna({
+                'type': '',
+                'origin_name': 'Unknown',
+                'location_name': 'Unknown'
+            })
+            
+            print(f"   📈 Datos transformados: {len(df_final)} registros")
+            
+            # 3. LOAD: Cargar a MySQL
+            # Crear tabla si no existe
+            Base.metadata.create_all(self.mysql_engine)
+            
+            # Usar pandas para insertar (to_sql)
+            registros_procesados = df_final.to_sql(
+                name='personajes_master',
+                con=self.mysql_engine,
+                if_exists='append',  # Append para no duplicar si existe
+                index=False,
+                method='multi'  # Inserción múltiple
+            )
+            
+            print(f"✅ Transformación completada: {registros_procesados} registros cargados")
+            
             return {
-                "mensaje": "Transformación implementada parcialmente",
-                "registros_procesados": 0,
+                "mensaje": "Pipeline finalizado",
+                "registros_procesados": registros_procesados,
                 "tabla_destino": "personajes_master",
                 "status": 200
             }
