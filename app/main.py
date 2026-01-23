@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from app.controllers.etl_controller import router as etl_router
 from app.database import get_mysql_engine
+from sqlalchemy import text
 
 app = FastAPI(
     title="ETL Pipeline API",
@@ -16,9 +17,10 @@ async def startup_event():
     """Inicializar conexiones al iniciar la app"""
     try:
         engine = get_mysql_engine()
-        # Probar conexión
+        # Probar conexión (forma correcta para SQLAlchemy 2.0)
         with engine.connect() as conn:
-            conn.execute("SELECT 1")
+            conn.execute(text("SELECT 1"))
+            conn.commit()
         print("✅ Conexión a MySQL inicializada correctamente")
     except Exception as e:
         print(f"❌ Error en conexión MySQL: {e}")
