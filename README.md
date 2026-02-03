@@ -30,8 +30,10 @@ Desarrollar una aplicación de Ingeniería de Datos (Backend) que orqueste un pr
 - **Control de Versiones**: Git, GitHub
 
 ### Estructura del Proyecto (Patrón MVC + Services)
+```
 laboratorio_etl/
-├── app/
+├── app
+```
 │   ├── main.py
 │   ├── config.py
 │   ├── database.py
@@ -39,9 +41,11 @@ laboratorio_etl/
 │   ├── models/personajes_sql.py
 │   ├── services/etl_service.py
 │   └── views/schemas.py
+```
 ├── requirements.txt
 ├── .env
 └── README.md
+```
 
 
 ##  Endpoints API
@@ -85,7 +89,7 @@ laboratorio_etl/
 git clone https://github.com/Santiagodp25/Laboratorio_etl.git
 cd Laboratorio_etl
 ```
-### 2. Crear entorno virtua
+### 2. Crear entorno virtual
 ```bash
 python -m venv venv
 .\venv\Scripts\activate
