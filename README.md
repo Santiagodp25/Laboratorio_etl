@@ -29,24 +29,24 @@ Desarrollar una aplicación de Ingeniería de Datos (Backend) que orqueste un pr
 - **Validación**: Pydantic
 - **Control de Versiones**: Git, GitHub
 
-### Estructura del Proyecto (Patrón MVC + Services)
-```
-laboratorio_etl/
-├── app
-```
-│   ├── main.py
-│   ├── config.py
-│   ├── database.py
-│   ├── controllers/etl_controller.py
-│   ├── models/personajes_sql.py
-│   ├── services/etl_service.py
-│   └── views/schemas.py
-```
-├── requirements.txt
-├── .env
-└── README.md
-```
+### Estructura del Proyecto (Patrón MVC + Services)  
 
+- **laboratorio_etl/** (raíz del proyecto)
+  - **app/** (código de la aplicación)
+    - `main.py` - Punto de entrada FastAPI
+    - `config.py` - Configuración
+    - `database.py` - Conexiones a bases de datos
+    - **controllers/** - Controladores de endpoints
+      - `etl_controller.py` - Endpoints ETL
+    - **models/** - Modelos de datos
+      - `personajes_sql.py` - Modelo SQLAlchemy
+    - **services/** - Lógica de negocio
+      - `etl_service.py` - Servicio ETL
+    - **views/** - Esquemas de validación
+      - `schemas.py` - Esquemas Pydantic
+  - `requirements.txt` - Dependencias de Python
+  - `.env` - Variables de entorno
+  - `README.md` - Este archivo
 
 ##  Endpoints API
 
@@ -63,7 +63,7 @@ laboratorio_etl/
 ```
 
 ### 2. `POST /api/v1/etl/extraer`
-**Descripción**: Extrae datos de Rick & Morty API y guarda en MongoDB.
+**Descripción**: Extrae datos de Rick & Morty API y guarda en MongoDB.  
 **Response**:
 ```json
 {
@@ -73,7 +73,7 @@ laboratorio_etl/
 ```
 
 ### 3. `POST /api/v1/etl/transformar`
-**Descripción**: Transforma datos de MongoDB y carga a MySQL.
+**Descripción**: Transforma datos de MongoDB y carga a MySQL.  
 **Response**:
 ```json
 {
