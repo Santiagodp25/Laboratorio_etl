@@ -10,24 +10,68 @@
     {
       "name": "Reset Sistema",
       "request": {
-        "method": "GET",
-        "header": []
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8000/api/v1/etl/reset",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "etl", "reset"]
+        }
       },
       "response": []
     },
     {
       "name": "Extraer Datos",
       "request": {
-        "method": "GET",
-        "header": []
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/v1/etl/extraer",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "etl", "extraer"]
+        }
       },
       "response": []
     },
     {
       "name": "Transformar Datos",
       "request": {
-        "method": "GET",
-        "header": []
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"accion\": \"transformar\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/v1/etl/transformar",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "etl", "transformar"]
+        }
       },
       "response": []
     }
